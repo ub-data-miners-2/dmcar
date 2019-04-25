@@ -1,0 +1,56 @@
+1. Install Virtual Env
+$ sudo pip install virtualenv virtualenvwrapper
+$ sudo rm -rf ~/.cache/pip
+
+2. Add the following to .profile
+$ vi ~/.profile
+ESC -> Shift + G -> Shift + O -> type or paste the followins:
+
+# virtualenv and virtualenvwrapper
+export WORKON_HOME=$HOME/.virtualenvs
+export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3
+source /usr/local/bin/virtualenvwrapper.sh
+
+ESC -> : -> wq -> enter
+
+$ . ~/.profile
+
+3. Creating Python VE
+$ mkvirtualenv picar3 -p python3
+$ . ~/.profile
+$ workon picar3
+
+4. Installing packages
+$ pip install numpy
+$ pip install smbus2
+$ pip install --upgrade imutils
+
+5. Download picar.tar file
+
+
+==============================
+
+# Camera Check
+vcgencmd get_camera
+# Still image
+raspistill -o image.jpg
+
+=============================
+Files
+
+- dmcar.py		: main file to control autonomous car
+			: $ python dmcar.py -b 5
+- lane_detection.py	: functions to detect lanes and PID control
+			: Line 187: vertices can be modified 
+- Line.py		: Line class
+
+- stop_detector.py	: test program for stop/non-stop CNN model
+			: $ python stop_detector.py
+- test-control.py	: test program for controlling servos
+
+- test-servo.py		: test program for servo
+
+- picar			: directory for servoes (2 back wheels and 1 front
+			: wheels) in a car
+			: mostly doesn't have to change
+
