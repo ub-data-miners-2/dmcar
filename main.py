@@ -81,6 +81,11 @@ posError = []			# difference between middle and car position
 bw.speed = SPEED		# car speed
 fw.turn(90)			# steering wheel angle
 
+crop_y1 = 100
+crop_y2 = 160
+crop_x1 = 230
+crop_x2 = 320
+
 # keep looping
 while True:
 	# grab the current frame
@@ -102,7 +107,8 @@ while True:
 	frame = frame[0:180, 0:320]
 	# crop for CNN model, i.e., traffic sign location
 	# can be adjusted based on camera angle
-	image = frame[90:135, 260:320]
+	image = frame[crop_y1:crop_x1, crop_y2:crop_x2]
+	# image = frame[90:135, 260:320]
 
 	frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 	frame_buffer.append(frame)
@@ -126,7 +132,7 @@ while True:
 	label = action
 	# build the label and draw it on the frame
 	# label = "{}: {:.2f}%".format(label, proba * 100)
-	blend_frame = cv2.rectangle(blend_frame, (135, 90), (260, 320), (0,0,255), 2)
+	blend_frame = cv2.rectangle(blend_frame, (crop_x1, crop_y1), (crop_x2, crop_y2), (0,0,255), 2)
 	blend_frame = cv2.cvtColor(blend_frame, cv2.COLOR_RGB2BGR)
 	blend_frame = cv2.putText(blend_frame, label, (10, 25),
 		cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
