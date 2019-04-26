@@ -21,4 +21,4 @@ class Logic:
             action = "stop"
         elif sign == "yield":
             action = "slow"
-        return action
+        return [action, confidence]
