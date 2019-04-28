@@ -22,7 +22,7 @@ class DmCar:
 	MAX_ANGLE = 20			# Maximum angle to turn right at one time
 	MIN_ANGLE = -MAX_ANGLE		# Maximum angle to turn left at one time
 
-	def __init__(self, config="/home/pi/dmcar-student/picar/config"):
+	def __init__(self, config="/home/pi/dmcar/picar/config"):
 		picar.setup()
 		fw = front_wheels.Front_Wheels(debug=False, db=config)
 		fw.turn(90) # set straight
@@ -101,8 +101,10 @@ while True:
 	blend_frame, lane_lines = color_frame_pipeline(frames=frame_buffer, solid_lines=True, temporal_smoothing=True)
 
 	# prepare the image to be classified by our deep learning network
-	image, p1, p2 = camera.get_section(frame)
-	image = cv2.resize(image , (28, 28))
+	image1, p1, p2 = camera.get_section(frame)
+	image1 = cv2.cvtColor(image1, cv2.COLOR_BGR2GRAY)
+	image1 = cv2.equalizeHist(image1)
+	image = cv2.resize(image1 , (32, 32))
 	image = image.astype("float") / 255.0
 	image = img_to_array(image)
 	image = np.expand_dims(image, axis=0)
@@ -123,6 +125,7 @@ while True:
 	blend_frame = cv2.cvtColor(blend_frame, cv2.COLOR_RGB2BGR)
 	blend_frame = cv2.putText(blend_frame, label, (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
 	cv2.imshow('blend', blend_frame)
+	cv2.imshow('input', image1)
 	key = cv2.waitKey(1) & 0xFF
 
 camera.off()
