@@ -10,6 +10,7 @@ class Logic:
         self.stop_model = load_model(STOP_MODEL_PATH)
         self.yield_model = load_model(YIELD_MODEL_PATH)
         self.rail_model = load_model(RAIL_MODEL_PATH)
+        self.consecutive_stop = 0
 
     def is_stop(self, image):
         other, stop = self.stop_model.predict(image)[0]
@@ -38,8 +39,12 @@ class Logic:
     def action_to_take(self, image):
         action = "move"
         sign, confidence = self.identify(image)
-        if sign == "stop":
+        if sign == "stop" and self.consecutive_stop < 10:
+            self.consecutive_stop += 1
             action = "stop"
         elif sign == "yield":
             action = "slow"
+            self.consecutive_stop = 0
+        else:
+            self.consecutive_stop = 0
         return [action, confidence]
