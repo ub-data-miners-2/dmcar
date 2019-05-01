@@ -75,6 +75,39 @@ class Camera:
 		return [frame[y1:y2, x1:x2], (x1, y1), (x2, y2)]
 
 
+
+
+def handleKeyPress(key, car):
+	keycmd = chr(key)
+
+	# if the 'q' key is pressed, end program
+	# if the 'w' key is pressed, moving forward
+	# if the 'x' key is pressed, moving backword
+	# if the 'a' key is pressed, turn left
+	# if the 'd' key is pressed, turn right
+	# if the 's' key is pressed, straight
+	# if the 'z' key is pressed, stop a car
+	if keycmd == 'q':
+		break
+	elif keycmd == 'w':
+		car.forward()
+	elif keycmd == 'x':
+		car.backward()
+	elif keycmd == 'a':
+		angle -= 5
+		if angle <= 45:
+			angle = 45
+		car.turn(angle)
+	elif keycmd == 'd':
+		angle += 5
+		if angle >= 135:
+			angle = 135
+		car.turn(angle)
+	elif keycmd == 's':
+		car.turn(90)
+	elif keycmd == 'z':
+		car.stop()
+
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-v", "--video",
@@ -118,6 +151,9 @@ while True:
 		car.set_speed(30)
 		car.forward()
 
+	# keep straight
+	# TODO: implement
+
 	label = action
 	# build the label and draw it on the frame
 	label = "{}: {:.2f}%".format(label, proba * 100)
@@ -127,7 +163,7 @@ while True:
 	cv2.imshow('blend', blend_frame)
 	cv2.imshow('input', image1)
 	key = cv2.waitKey(1) & 0xFF
-
+	handleKeyPress(key, car)
 camera.off()
 
 # close all windows
