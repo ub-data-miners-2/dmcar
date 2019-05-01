@@ -102,8 +102,6 @@ while True:
 
 	# prepare the image to be classified by our deep learning network
 	image1, p1, p2 = camera.get_section(frame)
-	image1 = cv2.cvtColor(image1, cv2.COLOR_BGR2GRAY)
-	image1 = cv2.equalizeHist(image1)
 	image = cv2.resize(image1 , (32, 32))
 	image = image.astype("float") / 255.0
 	image = img_to_array(image)
@@ -114,8 +112,10 @@ while True:
 	action, proba = brain.action_to_take(image)
 	if action == "stop":
 		car.stop()
-	else:
+	elif action == "slow":
 		car.set_speed(20)
+	else:
+		car.set_speed(30)
 		car.forward()
 
 	label = action
