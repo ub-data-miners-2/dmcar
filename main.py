@@ -89,6 +89,7 @@ def handleKeyPress(key, car):
 	# if the 'z' key is pressed, stop a car
 	if keycmd == 'q':
 		camera.off()
+		car.stop()
 		cv2.destroyAllWindows()
 		exit()
 	elif keycmd == 'w':
