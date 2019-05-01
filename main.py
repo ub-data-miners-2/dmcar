@@ -71,7 +71,7 @@ class Camera:
 		frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 		return frame
 
-	def get_section(self, frame, x1=230, y1=100, x2=286, y2=156):
+	def get_section(self, frame, x1=250, y1=100, x2=320, y2=156):
 		return [frame[y1:y2, x1:x2], (x1, y1), (x2, y2)]
 
 
