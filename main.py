@@ -88,7 +88,9 @@ def handleKeyPress(key, car):
 	# if the 's' key is pressed, straight
 	# if the 'z' key is pressed, stop a car
 	if keycmd == 'q':
-		break
+		camera.off()
+		cv2.destroyAllWindows()
+		exit()
 	elif keycmd == 'w':
 		car.forward()
 	elif keycmd == 'x':
@@ -164,7 +166,3 @@ while True:
 	cv2.imshow('input', image1)
 	key = cv2.waitKey(1) & 0xFF
 	handleKeyPress(key, car)
-camera.off()
-
-# close all windows
-cv2.destroyAllWindows()
