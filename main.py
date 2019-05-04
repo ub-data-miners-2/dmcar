@@ -33,6 +33,8 @@ class DmCar:
 		self.front_wheels = fw
 		self.back_wheels = bw
 		self.is_moving = False
+		self.position_error = []
+		self.set_speed(0)
 
 	def stop(self):
 		self.back_wheels.stop()
@@ -51,6 +53,43 @@ class DmCar:
 
 	def set_speed(self, amount):
 		self.back_wheels.speed = amount
+
+	def adjust_position(self, w, h, lane_lines):
+		if not self.is_moving:
+			return
+
+		y2L = h - 1
+		x2L = int((y2L - lane_lines[0].bias) / lane_lines[0].slope)
+		y2R = h - 1
+		x2R = int((y2R - lane_lines[1].bias) / lane_lines[1].slope)
+		mid_position_lane = ( x2R + x2L ) / 2
+
+		# negative -> + ANGLE, positive -> - ANGLE
+		car_position_err = w/2 - mid_position_lane
+		car_position_time = time.time()
+		self.position_error.append([car_position_err, car_position_time])
+
+		# Control Car
+		# Adjust P(KP), I(KI), D(KD) values as well as portion
+		# angle = PID(posError, KP=0.8, KI=0.05, KD=0.1) * 0.2
+		angle = PID(self.position_error, KP=0.8, KI=0.1, KD=0.1) * 0.25
+		# print(angle)
+
+		# MAX + - 20 degree
+		if angle > self.MAX_ANGLE:
+			angle = self.MAX_ANGLE
+		elif angle < self.MIN_ANGLE:
+			angle = self.MIN_ANGLE
+
+		ANGLE = 90 - angle
+
+		# Right turn max 135, Left turn max 45
+		if ANGLE >= 135:
+			ANGLE = 135
+		elif ANGLE <= 45:
+			ANGLE = 45
+
+		self.turn(ANGLE)
 
 class Camera:
 	def __init__(self, src = 0):
@@ -75,8 +114,6 @@ class Camera:
 		return [frame[y1:y2, x1:x2], (x1, y1), (x2, y2)]
 
 
-
-
 def handleKeyPress(key, car):
 	keycmd = chr(key)
 
@@ -93,6 +130,7 @@ def handleKeyPress(key, car):
 		cv2.destroyAllWindows()
 		exit()
 	elif keycmd == 'w':
+		car.set_speed(30)
 		car.forward()
 	elif keycmd == 'x':
 		car.backward()
@@ -151,11 +189,11 @@ while True:
 	elif action == "slow":
 		car.set_speed(20)
 	else:
-		car.set_speed(30)
 		car.forward()
 
 	# keep straight
-	# TODO: implement
+	h, w = frame.shape[:2]
+	#car.adjust_position(w, h, lane_lines)
 
 	label = action
 	# build the label and draw it on the frame
