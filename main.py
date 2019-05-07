@@ -196,7 +196,8 @@ while True:
 
 	# keep straight
 	h, w = frame.shape[:2]
-#	car.adjust_position(w, h, lane_lines)
+
+	car.adjust_position(w, h, lane_lines)
 
 	label = action
 	# build the label and draw it on the frame
