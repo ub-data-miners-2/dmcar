@@ -20,23 +20,29 @@ import math
 import os
 
 class DmCar:
-	MAX_ANGLE = 20			# Maximum angle to turn right at one time
-	MIN_ANGLE = -MAX_ANGLE          # Maximum angle to turn left at one time
+	MAX_ANGLE = 110			# Maximum angle to turn right at one time
+	MIN_ANGLE = 70                  # Maximum angle to turn left at one time
 	DEFAULT_SPEED = 30
+	INITIAL_ANGLE = 90
 
 	def __init__(self, config="/home/pi/dmcar/picar/config"):
 		picar.setup()
 		fw = front_wheels.Front_Wheels(debug=False, db=config)
-		fw.turn(90) # set straight
+		fw.turn(self.INITIAL_ANGLE) # set straight
 		bw = back_wheels.Back_Wheels(debug=False, db=config)
 
 		bw.ready()
 		fw.ready()
+		self.angle = self.INITIAL_ANGLE
 		self.front_wheels = fw
 		self.back_wheels = bw
+		self.started = False
 		self.is_moving = False
 		self.position_error = []
 		self.set_speed(0)
+
+	def start(self):
+		self.started = True
 
 	def stop(self):
 		self.back_wheels.stop()
@@ -52,20 +58,22 @@ class DmCar:
 		self.is_moving = True
 
 	def turn(self, angle):
+		self.angle = angle
 		self.front_wheels.turn(angle)
 
 	def set_speed(self, amount):
 		self.back_wheels.speed = amount
 
 	def adjust_position(self, w, h, lane_lines):
-		if not self.is_moving:
-			return
-
 		y2L = h - 1
 		x2L = int((y2L - lane_lines[0].bias) / lane_lines[0].slope)
 		y2R = h - 1
 		x2R = int((y2R - lane_lines[1].bias) / lane_lines[1].slope)
 		mid_position_lane = ( x2R + x2L ) / 2
+		self.lane_middle = mid_position_lane
+
+		if not self.is_moving:
+			return
 
 		# negative -> + ANGLE, positive -> - ANGLE
 		car_position_err = w/2 - mid_position_lane
@@ -75,24 +83,18 @@ class DmCar:
 		# Control Car
 		# Adjust P(KP), I(KI), D(KD) values as well as portion
 		# angle = PID(posError, KP=0.8, KI=0.05, KD=0.1) * 0.2
-		angle = PID(self.position_error, KP=0.8, KI=0.1, KD=0.1) * 0.25
-		# print(angle)
+		delta_angle = PID(self.position_error, KP=0.05, KI=0.1, KD=1.5) * 0.2
+		print(delta_angle)
 
-		# MAX + - 20 degree
-		if angle > self.MAX_ANGLE:
-			angle = self.MAX_ANGLE
-		elif angle < self.MIN_ANGLE:
-			angle = self.MIN_ANGLE
+		new_angle = self.angle - delta_angle
 
-		ANGLE = 90 - angle
+		# Right turn max 110, Left turn max 70
+		if new_angle >= self.MAX_ANGLE:
+			new_angle = self.MAX_ANGLE
+		elif new_angle <= self.MIN_ANGLE:
+			new_angle = self.MIN_ANGLE
 
-		# Right turn max 135, Left turn max 45
-		if ANGLE >= 135:
-			ANGLE = 135
-		elif ANGLE <= 45:
-			ANGLE = 45
-
-		self.turn(ANGLE)
+		self.turn(new_angle)
 
 class Camera:
 	def __init__(self, src = 0):
@@ -104,12 +106,12 @@ class Camera:
 	def get_frame(self):
 		frame = self.stream.read()
 		frame = imutils.resize(frame, width=320)
-		(h, w) = frame.shape[:2]
-		r = 320 / float(w)
-		dim = (320, int(h * r))
-		frame = cv2.resize(frame, dim, cv2.INTER_AREA)
+		#(h, w) = frame.shape[:2]
+		#r = 320 / float(w)
+		#dim = (320, int(h * r))
+		#frame = cv2.resize(frame, dim, cv2.INTER_AREA)
 		# resize to 320 x 180 for wide frame
-		frame = frame[0:180, 0:320]
+		#frame = frame[0:180, 0:320]
 		frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 		return frame
 
@@ -133,6 +135,7 @@ def handleKeyPress(key, car):
 		cv2.destroyAllWindows()
 		exit()
 	elif keycmd == 'w':
+		car.start()
 		car.set_speed(30)
 		car.forward()
 	elif keycmd == 'x':
@@ -176,9 +179,19 @@ while True:
 	frame = camera.get_frame()
 	frame_buffer.append(frame)
 	blend_frame, lane_lines = color_frame_pipeline(frames=frame_buffer, solid_lines=True, temporal_smoothing=True)
+	# keep straight
+	h, w = frame.shape[:2]
+	car.adjust_position(w, h, lane_lines)
 
 	# prepare the image to be classified by our deep learning network
-	image1, p1, p2 = camera.get_section(frame)
+	c1 = car.lane_middle + 70
+	if c1 > 280:
+		c1 = 280
+	c2 = c1 + 90
+	if c2 > 320:
+		c2 = 320
+	image1, p1, p2 = camera.get_section(frame,x1=int(c1),x2=int(c2))
+	image1 = cv2.cvtColor(image1, cv2.COLOR_BGR2RGB)
 	image = cv2.resize(image1 , (32, 32))
 	image = image.astype("float") / 255.0
 	image = img_to_array(image)
@@ -193,11 +206,6 @@ while True:
 		car.set_speed(20)
 	else:
 		car.forward()
-
-	# keep straight
-	h, w = frame.shape[:2]
-
-	car.adjust_position(w, h, lane_lines)
 
 	label = action
 	# build the label and draw it on the frame
