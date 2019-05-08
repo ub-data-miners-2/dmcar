@@ -118,8 +118,7 @@ class Camera:
 	def get_section(self, frame, x1=230, y1=100, x2=320, y2=180):
 		return [frame[y1:y2, x1:x2], (x1, y1), (x2, y2)]
 
-
-def handleKeyPress(key, car):
+def handleKeyPress(key, car, writer):
 	keycmd = chr(key)
 
 	# if the 'q' key is pressed, end program
@@ -130,6 +129,8 @@ def handleKeyPress(key, car):
 	# if the 's' key is pressed, straight
 	# if the 'z' key is pressed, stop a car
 	if keycmd == 'q':
+		if not writer is None:
+			writer.release()
 		camera.off()
 		car.stop()
 		cv2.destroyAllWindows()
@@ -218,5 +219,17 @@ while True:
 	blend_frame = cv2.putText(blend_frame, label, (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
 	cv2.imshow('blend', blend_frame)
 	cv2.imshow('input', image1)
+
+	# Video Writing
+	if writer is None:
+		if args.get("video", False):
+			writer = cv2.VideoWriter(args["video"],
+				0x00000021,
+				15.0, (320,180), True)
+
+	# if a video path is provided, write a video clip
+	if args.get("video", False):
+		writer.write(blend_frame)
+
 	key = cv2.waitKey(1) & 0xFF
-	handleKeyPress(key, car)
+	handleKeyPress(key, car, writer)
