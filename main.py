@@ -199,17 +199,17 @@ while True:
 
 	# classify the input image and initialize the label and
 	# probability of the prediction
-	action, proba = brain.action_to_take(image)
+	action, sign, proba = brain.action_to_take(image)
 	if action == "stop":
 		car.stop()
 	elif action == "slow":
 		car.set_speed(20)
 	else:
-		car.forward()
+		if car.started():
+			car.forward()
 
-	label = action
 	# build the label and draw it on the frame
-	label = "{}: {:.2f}%".format(label, proba * 100)
+	label = "{}: {:.2f}%".format(sign, proba * 100)
 	blend_frame = cv2.rectangle(blend_frame, p1, p2, (0,0,255), 2)
 	blend_frame = cv2.cvtColor(blend_frame, cv2.COLOR_RGB2BGR)
 	blend_frame = cv2.putText(blend_frame, label, (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)

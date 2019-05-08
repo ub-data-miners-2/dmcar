@@ -89,9 +89,9 @@ while True:
 		TOTAL_CONSEC = 0
 		STOP = False
 	'''
-	label, proba = brain.action_to_take(image)
+	action, sign, proba = brain.action_to_take(image)
 	# build the label and draw it on the frame
-	label = "{}: {:.2f}%".format(label, proba * 100)
+	label = "{}: {:.2f}%".format(sign, proba * 100)
 	frame = cv2.rectangle(frame, (crop_x1, crop_y1), (crop_x2, crop_y2), (0,0,255), 2)
 	frame = cv2.putText(frame, label, (10, 25),
 		cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
