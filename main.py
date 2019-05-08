@@ -205,7 +205,7 @@ while True:
 	elif action == "slow":
 		car.set_speed(20)
 	else:
-		if car.started():
+		if car.started:
 			car.forward()
 
 	# build the label and draw it on the frame
