@@ -74,7 +74,7 @@ class Logic:
             action = "slow"
             self.consecutive_stop = 0
         elif sign == "nothing":
-            sign = ""
+            sign = None
             self.consecutive_stop = 0
         else:
             self.consecutive_stop = 0

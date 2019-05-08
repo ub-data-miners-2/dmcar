@@ -209,7 +209,10 @@ while True:
 			car.forward()
 
 	# build the label and draw it on the frame
-	label = "{}: {:.2f}%".format(sign, proba * 100)
+	if sign is None:
+		label = ''
+	else:
+		label = "{}: {:.2f}%".format(sign, proba * 100)
 	blend_frame = cv2.rectangle(blend_frame, p1, p2, (0,0,255), 2)
 	blend_frame = cv2.cvtColor(blend_frame, cv2.COLOR_RGB2BGR)
 	blend_frame = cv2.putText(blend_frame, label, (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
