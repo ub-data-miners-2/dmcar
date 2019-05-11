@@ -174,6 +174,7 @@ camera = Camera()
 time.sleep(2.0)
 car = DmCar()
 brain = Logic()
+writer = None
 
 # keep looping
 while True:
