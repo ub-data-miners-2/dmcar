@@ -38,10 +38,10 @@ raspistill -o image.jpg
 =============================
 Files
 
-- dmcar.py		: main file to control autonomous car
-			: $ python dmcar.py -b 5
+- main.py		: main file to control autonomous car
+			: $ python main.py -b 5
 - lane_detection.py	: functions to detect lanes and PID control
-			: Line 187: vertices can be modified 
+			: Line 187: vertices can be modified
 - Line.py		: Line class
 
 - stop_detector.py	: test program for stop/non-stop CNN model
